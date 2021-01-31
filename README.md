@@ -90,6 +90,9 @@ Simple WhatsApp Bot
 > node index.js
 ```
 
+## THANKS TO <img src="https://github.com/TheDudeThatCode/TheDudeThatCode/blob/master/Assets/Handshake.gif" width="60px">
+[`Kelvin`](https://github.com/Kelvin44)
+
 # SOSIAL MEDIA ADMIN <img src="https://github.com/TheDudeThatCode/TheDudeThatCode/blob/master/Assets/powerup.gif" width="29px">
 
 [`Instagram Admin`](https://Instagram.com/bintangp_28) 
