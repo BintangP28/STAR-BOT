@@ -21,7 +21,7 @@
 
  
 
-<p align="center"><a href="https://wa.me/6283813304760?text=%23menu" target="_blank">My Whatsapp BOT</a>.</p>
+<p align="center"><a href="https://wa.me/6283813304760?text=%23menu" target="_blank">My Whatsapp </a>.</p>
 
 </div>
 </p>
