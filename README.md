@@ -91,7 +91,7 @@ Simple WhatsApp Bot
 ```
 
 ## THANKS TO <img src="https://github.com/TheDudeThatCode/TheDudeThatCode/blob/master/Assets/Handshake.gif" width="60px">
-[`Kelvin`](https://github.com/Kelvin44)
+[`Kelvin44`](https://github.com/Kelvin44)
 
 # SOSIAL MEDIA ADMIN <img src="https://github.com/TheDudeThatCode/TheDudeThatCode/blob/master/Assets/powerup.gif" width="29px">
 
