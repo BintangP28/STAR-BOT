@@ -65,11 +65,13 @@ let handler  = async (m, { conn, usedPrefix: _p }) => {
     }
     conn.menu = conn.menu ? conn.menu : {}
     let before = conn.menu.before || `
-┏━━❰ *Bintang Pamungkas* ❱━━━
+╭═┅ৡ ৢ ͡ ͜✦═══╡꧁꧂╞═══┅ৡ ৢ ͡ ͜✦═╮ %readmore
+┃
+┃━⋆ ⃟⊱๑⋆ ⃟⊱๑ ˌ ⃟ˌ ⃟ˌ ⃟ˌâ⚔ˌ ⃟ˌ ⃟ˌ ⃟ˌ ⃟ˌ ๑⋆ ⃟⊱๑⋆ ⃟⊱๑⋆ ⃟⊱━
 ┃
 ┣━⊱ *Hai, %name!*
 ┃
-┣⊱ *EXP:V%exp XP*
+┣⊱ *EXP: %exp XP*
 ┣━⊱ *LIMIT: %limit Limit*
 ┃
 ┣⊱ *Tanggal: %week , %date*
@@ -77,12 +79,12 @@ let handler  = async (m, { conn, usedPrefix: _p }) => {
 ┃
 ┣⊱ *Uptime: %uptime*
 ┣━⊱ *Database: %totalreg nomor*
-┣⊱ *GITHUB:*
-┣━⊱ https://github.com/BintangP28
+┣⊱ *BOT:*
+┣━⊱ Bintang Pamungkas
 ┣⊱ *OWNER:*
 ┣━⊱ wa.me/6283813304760
 ┃
-┗━━❰ *Bintang Pamungkas* ❱━━━
+╰═┅ৡ ৢ ͡ ͜✦═══╡꧁꧂╞═══┅ৡ ৢ ͡ ͜✦═╯
 %readmore`
     let header = conn.menu.header || '┏━━━━⊱❰ *%category* ❱'
     let body   = conn.menu.body   || '┣━⊱ *%cmd%islimit*'
