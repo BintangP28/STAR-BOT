@@ -1,5 +1,5 @@
 {
-  "name": "wabot-aq",
+  "name": "STAR-BOT",
   "version": "1.0.0",
   "description": "Customizable WhatsApp Bot",
   "main": "index.js",
@@ -16,7 +16,7 @@
     "termux-whatsapp-bot",
     "whatsapp-bot"
   ],
-  "author": "Nurutomo",
+  "author": "Bintang",
   "license": "ISC",
   "dependencies": {
     "@adiwajshing/baileys": "^3.4.1",
