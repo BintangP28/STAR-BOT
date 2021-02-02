@@ -4,6 +4,7 @@ let qrcode = require('qrcode')
 let simple = require('./lib/simple')
 let yargs = require('yargs/yargs')
 let syntaxerror = require('syntax-error')
+let fetch = require('node-fetch')
 let chalk = require('chalk')
 let fs = require('fs')
 let path = require('path')
@@ -11,11 +12,21 @@ let util = require('util')
 let WAConnection = simple.WAConnection(_WAConnection)
 
 
-global.owner = ['6283813304760@s.whatsapp.net'] // Put your number here
-global.mods = ['6283813304760@s.whatsapp.net'] // Want some help?
-global.prems = ['6283813304760@s.whatsapp.net'] // Premium user has unlimited limit
+global.owner = ['6283813304760'] // Put your number here
+global.mods = [] // Want some help?
+global.prems = [] // Premium user has unlimited limit
+global.APIs = { // API Prefix
+  // name: 'https://website'
+  nrtm: 'https://nurutomo.herokuapp.com',
+  xteam: 'https://api.xteam.xyz'
+}
+global.APIKeys = { // APIKey Here
+  // 'https://website': 'apikey'
+  'https://api.xteam.xyz': 'test'
+}
 
 
+global.API = (name, path = '/', query = {}, apikeyqueryname) => (name in global.APIs ? global.APIs[name] : name) + path + (query || apikeyqueryname ? '?' + Object.entries({...query, [apikeyqueryname]: global.APIKeys[name in global.APIs ? global.APIs[name] : name]}).map(([key, val]) => encodeURIComponent(key) + (val || val === false ? '=' + encodeURIComponent(val) : '')).join('&') : '')
 global.timestamp = {
   start: new Date
 }
@@ -24,14 +35,16 @@ let opts = yargs(process.argv.slice(2)).exitProcess(false).parse()
 global.opts = Object.freeze({...opts})
 global.prefix = new RegExp('^[' + (opts['prefix'] || '‎xzXZ\\/i!#$%\\-+£¢€¥^°=¶∆×÷π√✓©®:;?&.') + ']')
 
-global.DATABASE = new (require('./lib/database'))(opts._[0] ? opts._[0] + '_' : '' + 'database.json', null, 2)
+global.DATABASE = new (require('./lib/database'))(`${opts._[0] ? opts._[0] + '_' : ''}database.json`, null, 2)
 if (!global.DATABASE.data.users) global.DATABASE.data = {
   users: {},
   groups: {},
   chats: {},
+  stats: {},
 }
 if (!global.DATABASE.data.groups) global.DATABASE.data.groups = {}
 if (!global.DATABASE.data.chats) global.DATABASE.data.chats = {}
+if (!global.DATABASE.data.stats) global.DATABASE.data.stats = {}
 if (opts['server']) {
   let express = require('express')
   global.app = express()
@@ -57,13 +70,14 @@ setInterval(async () => {
     lastJSON = JSON.stringify(global.DATABASE.data)
   }
 }, 60 * 1000) // Save every minute
+
+const isNumber = x => typeof x === 'number' && !isNaN(x)
 conn.handler = async function (m) {
   try {
   	simple.smsg(this, m)
     m.exp = 0
     m.limit = false
     try {
-      const isNumber = x => typeof x === 'number' && !isNaN(x)
       let user
       if (user = global.DATABASE._data.users[m.sender]) {
         if (!isNumber(user.exp)) user.exp = 0
@@ -124,6 +138,7 @@ conn.handler = async function (m) {
               false
 
   			if (!isAccept) continue
+        m.plugin = name
         let isMods = isOwner || global.mods.map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender)
         let isPrems = isROwner || global.prems.map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender)
         let groupMetadata = m.isGroup ? await this.groupMetadata(m.chat) : {}
@@ -210,11 +225,37 @@ conn.handler = async function (m) {
   	}
   } finally {
     //console.log(global.DATABASE._data.users[m.sender])
-    let user
-    if (m && m.sender && (user = global.DATABASE._data.users[m.sender])) {
-      user.exp += m.exp
-      user.limit -= m.limit * 1
-    }
+    let user, stats = global.DATABASE._data.stats
+    if (m) {
+      if (m.sender && (user = global.DATABASE._data.users[m.sender])) {
+        user.exp += m.exp
+        user.limit -= m.limit * 1
+      }
+      
+      let stat
+      if (m.plugin) {
+        let now = + new Date
+        if (m.plugin in stats) {
+          stat = stats[m.plugin]
+          if (!isNumber(stat.total)) stat.total = 1
+          if (!isNumber(stat.success)) stat.success = m.error ? 0 : 1
+          if (!isNumber(stat.last)) stat.last = now
+          if (!isNumber(stat.lastSuccess)) stat.lastSuccess = m.error ? 0 : now
+        } else stat = stats[m.plugin] = {
+          total: 1,
+          success: m.error ? 0 : 1,
+          last: now,
+          lastSuccess: m.error ? 0 : now
+        }
+        stat.total += 1
+        stat.last = now
+        if (!m.error) {
+          stat.success += 1
+          stat.lastSuccess = now
+        }
+      }
+    } 
+    
     try {
       require('./lib/print')(m, this)
     } catch (e) {
@@ -223,7 +264,7 @@ conn.handler = async function (m) {
   }
 }
 conn.welcome = 'Hai, @user!\nSelamat datang di grup @subject'
-conn.bye = 'Selamat tenang di alam sana @user!'
+conn.bye = 'Selamat tinggal @user!'
 conn.onAdd = async function ({ m, participants }) {
   let chat = global.DATABASE._data.chats[m.key.remoteJid]
   if (!chat.welcome) return
@@ -264,7 +305,12 @@ conn.onLeave = async function  ({ m, participants }) {
 conn.onDelete = async function (m) {
   let chat = global.DATABASE._data.chats[m.key.remoteJid]
   if (chat.delete) return
-  await this.reply(m.key.remoteJid, `Terdeteksi @${m.participant.split`@`[0]} telah menghapus pesan`, m.message, {
+  await this.reply(m.key.remoteJid, `
+Terdeteksi @${m.participant.split`@`[0]} telah menghapus pesan
+
+Untuk mematikan fitur ini, ketik
+*.enable delete*
+`.trim(), m.message, {
     contextInfo: {
       mentionedJid: [m.participant]
     }
@@ -277,12 +323,18 @@ conn.on('message-delete', conn.onDelete)
 conn.on('group-add', conn.onAdd)
 conn.on('group-leave', conn.onLeave)
 conn.on('error', conn.logger.error)
-conn.on('close', async () => {
-  if (conn.state == 'close') {
-    await conn.loadAuthInfo(authFile)
-    await conn.connect()
-    global.timestamp.connect = new Date
-  }
+conn.on('close', () => {
+  setTimeout(async () => {
+    try {
+      if (conn.state === 'close') {
+        await conn.loadAuthInfo(authFile)
+        await conn.connect()
+        global.timestamp.connect = new Date
+      }
+    } catch (e) {
+      conn.logger.error(e)
+    }
+  }, 5000)
 })
 
 global.dfail = (type, m, conn) => {
